@@ -1,0 +1,4 @@
+git init 初始化git
+git remote add origin <远程仓库的URL> 建立远程仓库链接
+git remote -v 查看远程仓库
+git fetch --all 获取分支
