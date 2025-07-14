@@ -1,9 +1,10 @@
 from py2neo import Graph
 import pydot
 import re
+from common import neo4j_local_ip, neo4j_username, neo4j_password
 
 # 连接Neo4j
-graph = Graph("bolt://localhost:7687", auth=("neo4j", "lpj123456"))
+graph = Graph(neo4j_local_ip, auth=(neo4j_username, neo4j_password))
 '''
     解析AST代码，把结构转换成neo4j的cypher命令，存储到知识图谱
 '''
@@ -60,7 +61,8 @@ def dot_to_cypher(dot_data):
     get_command_by_node(graphs, cypher_commands, node_ids)
     # 生成关系CYPHER
     # 递归处理所有子图和主图边
-    for node in graph.get_subgraphs():
+
+    for node in graphs.get_subgraphs():
         get_command_by_node([node], cypher_commands, node_ids)
         for edge in node.get_edges():
             print(edge)
@@ -92,7 +94,7 @@ def create_kg_from_dot(dot_file):
     with open(dot_file, 'r', encoding='utf-8') as f:
         dot_data = f.read()
     cypher = dot_to_cypher(dot_data)
-    import_kg_to_neo4j(cypher)
+    # import_kg_to_neo4j(cypher)
 
 
 dot_file = "./AST_windows_deepseek_all.dot"
