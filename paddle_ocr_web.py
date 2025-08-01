@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-  
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from paddleocr import PPStructureV3
 import uvicorn
+
 '''
     该项目基于PaddleOCR实现PDF转Markdown功能。
     项目结构：
@@ -139,8 +142,10 @@ async def get_upload_page():
                 });
                 
                 if (response.ok) {
-                    // 获取文件名
-                    let filename = 'converted.md';
+                    // 获取上传文件的基本名称并替换扩展名为.md
+                    const originalFilename = fileInput.files[0].name;
+                    const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+                    let filename = baseName + '.md';
                     const contentDisposition = response.headers.get('Content-Disposition');
                     if (contentDisposition) {
                         const filenameMatch = contentDisposition.match(/filename=(.+)/);
@@ -227,4 +232,4 @@ async def get_upload_page():
     """
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8083)
+    uvicorn.run(app, host="0.0.0.0", port=8083,log_level="debug")
