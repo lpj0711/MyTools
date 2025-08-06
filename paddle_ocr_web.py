@@ -6,6 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from paddleocr import PPStructureV3
 import uvicorn
+import os
+from markdown_to_docx import markdown_to_docx_with_images
 
 '''
     该项目基于PaddleOCR实现PDF转Markdown功能。
@@ -37,6 +39,8 @@ async def convert_pdf_to_markdown(file: UploadFile = File(...)):
     
     markdown_list = []
     for res in output:
+        save_img(res.markdown)
+        print(res.markdown)
         markdown_list.append(res.markdown)
     
     markdown_texts = pipeline.concatenate_markdown_pages(markdown_list)
@@ -47,9 +51,25 @@ async def convert_pdf_to_markdown(file: UploadFile = File(...)):
     
     with open(mkd_file_path, "w", encoding="utf-8") as f:
         f.write(markdown_texts)
-    
+    save_docx(mkd_file_path)
     # 返回Markdown文件
     return FileResponse(mkd_file_path, media_type="text/markdown", filename=mkd_file_path.name)
+
+def save_img(data):
+    # 保存图片
+    for img_path, img_obj in data['markdown_images'].items():
+        # 创建目录（如果不存在）
+        os.makedirs(Path("output")/os.path.dirname(img_path), exist_ok=True)
+        # 保存图片
+        img_obj.save(Path("output")/img_path)
+        print(f"图片已保存到: {img_path}")
+
+def save_docx(markdown_file):
+    try:
+        docx_path = markdown_to_docx_with_images(markdown_file)
+        print(f"转换成功！生成的Word文档: {docx_path}")
+    except Exception as e:
+        print(f"转换失败: {e}")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_upload_page():
